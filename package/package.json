@@ -32,7 +32,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/namesake/tiptap-steps.git",
+		"url": "https://github.com/namesakefyi/tiptap-steps.git",
 		"directory": "package"
 	}
 }
