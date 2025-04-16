@@ -12,6 +12,7 @@ jobs:
   version:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Checkout code repository
         uses: actions/checkout@v4
