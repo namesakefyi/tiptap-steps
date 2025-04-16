@@ -1,0 +1,38 @@
+{
+	"name": "tiptap-steps",
+	"version": "1.0.0",
+	"description": "A step-by-step guide extension for Tiptap",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"prepack": "pnpm build",
+		"test": "vitest --environment=jsdom"
+	},
+	"exports": {
+		"import": "./dist/index.mjs",
+		"require": "./dist/index.js"
+	},
+	"keywords": ["tiptap", "tiptap extension", "tiptap steps", "prosemirror"],
+	"author": "Eva Decker",
+	"files": ["dist/"],
+	"license": "MIT",
+	"devDependencies": {
+		"@tiptap/core": "^2.11.7",
+		"esbuild": "^0.25.2",
+		"jsdom": "^26.1.0",
+		"tsup": "^8.4.0",
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.1"
+	},
+	"peerDependencies": {
+		"@tiptap/core": "^2.11.7"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/namesake/tiptap-steps.git",
+		"directory": "package"
+	}
+}

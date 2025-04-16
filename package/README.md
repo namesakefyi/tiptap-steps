@@ -1,0 +1,119 @@
+# tiptap-steps
+A step-by-step guide extension for Tiptap
+
+## Getting Started
+
+### Installation
+
+```zsh
+npm install tiptap-steps
+```
+
+### Usage
+
+This package is separated into 4 main extensions:
+
+1. `Steps`: The container for an ordered list
+2. `StepItem`: The container for the title and content of a single list item
+3. `StepTitle`: The title for an item
+4. `StepContent`: The contents for an item
+
+In order to insert and use steps, one or more nodes within your document need to accept the `"steps"` content type.
+
+```tsx
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { Steps, StepItem, StepTitle, StepContent } from "tiptap-steps";
+import Document from "@tiptap/extension-document";
+
+const Editor = () => {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        document: false,
+      }),
+      Document.extend({
+        // Change from "block+" (default) to accept steps
+        content: "(block | steps)+", 
+      }),
+      // Pass in the steps extensions
+      Steps,
+      StepItem,
+      StepTitle,
+      StepContent
+    ],
+    content: "Hello world",
+  });
+
+  return <EditorContent editor={editor} />;
+};
+
+export default Editor;
+```
+
+If you want the steps to look like the example, add this CSS to your app:
+
+```css
+ol[data-type="steps"] {
+  counter-reset: steps;
+  display: flex;
+  flex-direction: column;
+
+  &:not(:first-child) {
+    margin-top: 1.5rem;
+  }
+}
+
+li[data-type="step-item"] {
+  padding: 0;
+  counter-increment: steps;
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "number title"
+    "line content";
+
+  &::before {
+    all: unset;
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    grid-area: number;
+    content: counter(steps);
+    background-color: #00000017;
+  }
+
+  &::after {
+    grid-area: line;
+    width: 2px;
+    height: 100%;
+    margin-inline: auto;
+    background-color: #0000000F;
+    content: "";
+  }
+
+  &:last-child::after {
+    visibility: hidden;
+  }
+
+  &:last-child div[data-type="step-content"] {
+    padding-bottom: 0.75rem;
+  }
+}
+
+div[data-type="step-title"] {
+  grid-area: title;
+  font-size: 2rem;
+  font-weight: medium;
+}
+
+div[data-type="step-content"] {
+  grid-area: content;
+  padding-block-end: 1.5rem;
+}
+```
