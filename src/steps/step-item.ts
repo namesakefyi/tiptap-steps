@@ -8,7 +8,7 @@ declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     stepItem: {
       /**
-       * Add a new step to the bottom of the list.
+       * Add a new step after the current step.
        */
       addStep: () => ReturnType;
 
