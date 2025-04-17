@@ -1,5 +1,8 @@
 # tiptap-steps
-A step-by-step guide extension for Tiptap
+
+A step-by-step guide extension for [Tiptap](https://tiptap.dev/).
+
+![NPM Badge](https://img.shields.io/npm/v/tiptap-steps) [![CI](https://github.com/namesakefyi/tiptap-steps/actions/workflows/test.yml/badge.svg)](https://github.com/namesakefyi/tiptap-steps/actions/workflows/test.yml)
 
 ## Getting Started
 
