@@ -1,5 +1,11 @@
 # tiptap-steps
 
+## 1.0.2
+
+### Patch Changes
+
+- e899b27: Fix broken package
+
 ## 1.0.1
 
 ### Patch Changes
