@@ -42,6 +42,9 @@ export const StepContent = Node.create<StepContentOptions>({
 				const { selection } = state;
 				const { $anchor } = selection;
 
+				// If we're not in step content, ignore
+				if (this.type.name !== "stepContent") return false;
+
 				const stepContent = findParentNode(
 					(node) => node.type.name === "stepContent",
 				)(state.selection);
@@ -49,12 +52,10 @@ export const StepContent = Node.create<StepContentOptions>({
 				// If no step content found, ignore
 				if (!stepContent) return false;
 
-				// If we're not in step content, ignore
-				if ($anchor.parent.type.name !== "stepContent") return false;
+				const endOfContent = stepContent.pos + stepContent.node.content.size;
 
 				// If cursor is not at the end of the content, ignore
-				if ($anchor.pos !== stepContent.pos + stepContent.node.nodeSize - 1)
-					return false;
+				if ($anchor.pos !== endOfContent) return false;
 
 				// If the selected node has text, ignore
 				if ($anchor.node().textContent.length > 0) return false;
@@ -64,38 +65,32 @@ export const StepContent = Node.create<StepContentOptions>({
 				return editor.chain().joinTextblockBackward().addStep().run();
 			},
 
-			Backspace: ({ editor }) => {
-				const { state } = editor;
-				const { selection } = state;
-				const { $to } = selection;
+			// Backspace: ({ editor }) => {
+			// 	const { state } = editor;
+			// 	const { selection } = state;
+			// 	const { $to } = selection;
 
-				const stepContent = findParentNode(
-					(node) => node.type.name === "stepContent",
-				)(state.selection);
-				if (!stepContent) return false;
+			// 	const stepContent = findParentNode(
+			// 		(node) => node.type.name === "stepContent",
+			// 	)(state.selection);
+			// 	if (!stepContent) return false;
 
-				// If we're not in step content, ignore
-				if ($to.parent.type.name !== "stepContent") return false;
+			// 	// If we're not in step content, ignore
+			// 	if (this.type.name !== "stepContent") return false;
 
-				// If we're not at the start of the content, ignore
-				if ($to.pos !== stepContent.pos + 1) return false;
+			// 	// If we're not at the start of the content, ignore
+			// 	// +1 to account for the start token of the paragraph node
+			// 	if ($to.pos !== stepContent.start + 1) return false;
 
-				// Find the step item and title
-				const stepItem = findParentNode(
-					(node) => node.type.name === "stepItem",
-				)(state.selection);
-				if (!stepItem) return false;
-
-				// Get the first child of step item (the title)
-				const stepTitle = stepItem.node.firstChild;
-				if (!stepTitle || stepTitle.type.name !== "stepTitle") return false;
-
-				// Focus at the end of the title
-				return editor
-					.chain()
-					.focus(stepItem.pos + 1)
-					.run();
-			},
+			// 	// Otherwise, jump back to the end of the title node
+			// 	return (
+			// 		editor
+			// 			.chain()
+			// 			// -2 to skip start and end tokens
+			// 			.focus(stepContent.start - 2)
+			// 			.run()
+			// 	);
+			// },
 		};
 	},
 });
