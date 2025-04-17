@@ -1,6 +1,7 @@
 {
 	"name": "tiptap-steps-root",
 	"private": true,
+	"packageManager": "pnpm@9.11.0",
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"ci:publish": "pnpm publish -r",

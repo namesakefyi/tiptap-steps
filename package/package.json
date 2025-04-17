@@ -42,5 +42,6 @@
 		"type": "git",
 		"url": "https://github.com/namesakefyi/tiptap-steps.git",
 		"directory": "package"
-	}
+	},
+	"packageManager": "pnpm@9.11.0"
 }
