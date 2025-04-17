@@ -5,11 +5,13 @@
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
+	"type": "module",
 	"scripts": {
 		"build": "tsup",
 		"dev": "tsup --watch",
 		"prepack": "pnpm build",
-		"test": "vitest --environment=jsdom"
+		"test": "vitest --environment=jsdom",
+		"test:coverage": "vitest --coverage"
 	},
 	"exports": {
 		"import": "./dist/index.mjs",
@@ -21,6 +23,12 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@tiptap/core": "^2.11.7",
+		"@tiptap/extension-bold": "^2.11.7",
+		"@tiptap/extension-document": "^2.11.7",
+		"@tiptap/extension-italic": "^2.11.7",
+		"@tiptap/extension-paragraph": "^2.11.7",
+		"@tiptap/extension-text": "^2.11.7",
+		"@vitest/coverage-v8": "^3.1.1",
 		"esbuild": "^0.25.2",
 		"jsdom": "^26.1.0",
 		"tsup": "^8.4.0",
@@ -34,5 +42,6 @@
 		"type": "git",
 		"url": "https://github.com/namesakefyi/tiptap-steps.git",
 		"directory": "package"
-	}
+	},
+	"packageManager": "pnpm@9.11.0"
 }
