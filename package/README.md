@@ -4,6 +4,8 @@ A step-by-step guide extension for [Tiptap](https://tiptap.dev/).
 
 ![NPM Badge](https://img.shields.io/npm/v/tiptap-steps) [![CI](https://github.com/namesakefyi/tiptap-steps/actions/workflows/test.yml/badge.svg)](https://github.com/namesakefyi/tiptap-steps/actions/workflows/test.yml)
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/namesakefyi/tiptap-steps/tree/main/examples/react?file=src%2FApp.tsx&title=Tiptap%20Steps%20Demo)
+
 ## Getting Started
 
 ### Installation
