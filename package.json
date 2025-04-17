@@ -1,6 +1,11 @@
 {
+	"name": "tiptap-steps-root",
+	"private": true,
 	"scripts": {
-		"ci:publish": "pnpm publish -r"
+		"preinstall": "npx only-allow pnpm",
+		"ci:publish": "pnpm publish -r",
+		"test": "pnpm --filter tiptap-steps test",
+		"test:coverage": "pnpm --filter tiptap-steps test:coverage"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.1"

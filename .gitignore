@@ -12,6 +12,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 *.tmp
+__snapshots__
 
 # Dependencies
 node_modules
