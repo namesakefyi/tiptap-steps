@@ -1,5 +1,11 @@
 import { expect, it, describe, beforeEach } from "vitest";
-import { newEditor, getStepTitles, getStepContents, getSteps } from "./utils";
+import {
+	newEditor,
+	getStepTitles,
+	getStepContents,
+	getSteps,
+	getStepItems,
+} from "./utils";
 import type { Editor } from "@tiptap/core";
 
 describe("StepTitle", () => {
@@ -92,5 +98,47 @@ describe("StepTitle", () => {
 
 		const steps = getSteps(editor);
 		expect(steps).toHaveLength(0);
+	});
+
+	it("moves focus to content when cursor is at the end of title text", () => {
+		// Create a steps node with a step item
+		editor.commands.setSteps();
+
+		// Get the step title node
+		const stepTitles = getStepTitles(editor);
+		expect(stepTitles).toHaveLength(1);
+
+		// Add content to the title
+		editor.commands.focus(stepTitles[0].pos);
+		editor.commands.insertContent("Test Title");
+
+		// Get the updated step title
+		const updatedStepTitles = getStepTitles(editor);
+		const stepTitle = updatedStepTitles[0];
+
+		// Calculate the end position of the title text
+		const endOfTitle = stepTitle.pos + stepTitle.node.content.size + 1;
+
+		// Focus at the end of the title text
+		editor.commands.focus(endOfTitle);
+
+		// Verify we're at the end of the title
+		const { $to } = editor.state.selection;
+		expect($to.pos).toBe(endOfTitle);
+		expect($to.parent.type.name).toBe("stepTitle");
+
+		// Simulate Enter key
+		editor.view.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+		// Verify focus moved to content
+		const { $from } = editor.state.selection;
+		expect($from.parent.type.name).toBe("stepContent");
+
+		// Insert content
+		editor.commands.insertContent("Test Content");
+
+		// Verify the title text wasn't cut
+		const finalStepTitles = getStepTitles(editor);
+		expect(finalStepTitles[0].node.textContent).toBe("Test Title");
 	});
 });
