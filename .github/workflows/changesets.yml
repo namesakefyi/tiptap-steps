@@ -37,7 +37,7 @@ jobs:
         with:
           commit: "ci: Release"
           title: "ci: Release"
-          publish: pnpm exec changeset tag && pnpm ci:publish
+          publish: pnpm ci:publish && pnpm exec changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

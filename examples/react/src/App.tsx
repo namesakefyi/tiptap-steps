@@ -1,6 +1,7 @@
 import { Steps, StepItem, StepTitle, StepContent } from 'tiptap-steps';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
-import { Document } from '@tiptap/extension-document';
+import Document from '@tiptap/extension-document';
+import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
 import './App.css';
 
@@ -17,7 +18,7 @@ function App() {
         <div className="button-group">
           <button
             onClick={() => editor.chain().focus().toggleSteps().run()}
-            disabled={!editor.can().chain().focus().toggleBold().run()}
+            disabled={!editor.can().chain().focus().toggleSteps().run()}
             className={editor.isActive('steps') ? 'is-active' : ''}
           >
             Toggle Steps
@@ -33,6 +34,21 @@ function App() {
     }),
     Document.extend({
       content: '(block | steps)+',
+    }),
+    Placeholder.configure({
+      includeChildren: true,
+      showOnlyCurrent: false,
+      placeholder: ({ node }) => {
+        if (node.type.name === "stepTitle") {
+          return "Add a title…";
+        }
+  
+        if (node.type.name === "stepContent") {
+          return "Add instructions…";
+        }
+  
+        return "Write something…";
+      },
     }),
     Steps,
     StepItem,

@@ -42,5 +42,3 @@ jobs:
       - name: Report coverage
         if: always()
         uses: davelosert/vitest-coverage-report-action@v2.8.1
-        with:
-          working-directory: package
