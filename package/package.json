@@ -3,7 +3,7 @@
 	"version": "1.0.1",
 	"description": "A step-by-step guide extension for Tiptap",
 	"main": "dist/index.js",
-	"module": "dist/index.mjs",
+	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
@@ -14,19 +14,12 @@
 		"test:coverage": "vitest --coverage"
 	},
 	"exports": {
-		"import": "./dist/index.mjs",
-		"require": "./dist/index.js"
+		"import": "./dist/index.js",
+		"require": "./dist/index.cjs"
 	},
-	"keywords": [
-		"tiptap",
-		"tiptap extension",
-		"tiptap steps",
-		"prosemirror"
-	],
+	"keywords": ["tiptap", "tiptap extension", "tiptap steps", "prosemirror"],
 	"author": "Eva Decker",
-	"files": [
-		"dist/"
-	],
+	"files": ["dist/"],
 	"license": "MIT",
 	"devDependencies": {
 		"@tiptap/core": "^2.11.7",
@@ -47,7 +40,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/namesakefyi/tiptap-steps.git",
+		"url": "git+https://github.com/namesakefyi/tiptap-steps.git",
 		"directory": "package"
 	},
 	"packageManager": "pnpm@9.11.0"

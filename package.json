@@ -5,6 +5,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"ci:publish": "pnpm publish -r",
+		"build": "pnpm --filter tiptap-steps build",
 		"test": "pnpm --filter tiptap-steps test",
 		"test:coverage": "pnpm --filter tiptap-steps test:coverage"
 	},
