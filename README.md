@@ -187,3 +187,22 @@ div[data-type='step-content'].is-empty::before {
 
 Read more about the [Tiptap placeholder extension](https://tiptap.dev/docs/editor/extensions/functionality/placeholder).
 
+
+### Commands
+
+Just as with other Tiptap extensions, the `Steps` extension comes with [commands](https://tiptap.dev/docs/editor/api/commands) that you can chain together when working within Tiptap.
+
+| Command | Description | Keyboard Shortcut |
+|---------|-------------|-------------------|
+| `setSteps` | Converts selected content into a steps list. If no content is selected, creates an empty step. | - |
+| `unsetSteps` | Converts a steps list back into regular paragraphs, with step titles as bold text. | - |
+| `toggleSteps` | Toggles between steps and regular paragraphs. | `Cmd/Ctrl-Alt-s` |
+| `addStep` | Adds a new step to the bottom of the list. | - |
+| `addStepBefore` | Adds a new step before the current step. | - |
+| `deleteStep` | Deletes the current step if it's empty. If it's the last step, deletes the entire steps list. | - |
+
+These commands can be used to create toolbar buttons which toggle the state of the steps component on or off.
+
+```tsx
+editor.chain().focus().toggleSteps().run()
+```

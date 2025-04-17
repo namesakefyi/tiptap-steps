@@ -18,7 +18,7 @@ function App() {
         <div className="button-group">
           <button
             onClick={() => editor.chain().focus().toggleSteps().run()}
-            disabled={!editor.can().chain().focus().toggleBold().run()}
+            disabled={!editor.can().chain().focus().toggleSteps().run()}
             className={editor.isActive('steps') ? 'is-active' : ''}
           >
             Toggle Steps
