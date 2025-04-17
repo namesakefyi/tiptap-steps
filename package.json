@@ -17,20 +17,16 @@
     "test": "vitest --environment=jsdom",
     "test:coverage": "vitest --coverage"
   },
+  "lint-staged": {
+    "*": "pnpm check:fix"
+  },
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/index.cjs"
   },
-  "keywords": [
-    "tiptap",
-    "tiptap extension",
-    "tiptap steps",
-    "prosemirror"
-  ],
+  "keywords": ["tiptap", "tiptap extension", "tiptap steps", "prosemirror"],
   "author": "Eva Decker",
-  "files": [
-    "dist/"
-  ],
+  "files": ["dist/"],
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
