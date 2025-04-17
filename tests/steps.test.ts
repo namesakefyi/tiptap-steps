@@ -7,6 +7,7 @@ import {
   getStepTitles,
   getSteps,
   newEditor,
+  createBasicStep,
 } from "./utils";
 
 describe("Steps", () => {
@@ -153,5 +154,105 @@ describe("Steps", () => {
     const json = editor.getJSON();
     expect(json.content?.[0].type).toBe("paragraph");
     expect(json.content?.[0].content?.[0].text).toBe("Step content");
+  });
+
+  it("creates steps from selected content", () => {
+    // Insert some content
+    editor.commands.insertContent([
+      createParagraph("Title"),
+      createParagraph("Content 1"),
+      createParagraph("Content 2"),
+    ]);
+
+    // Select all content
+    editor.commands.selectAll();
+
+    // Convert to steps
+    editor.commands.setSteps();
+
+    // Check that steps were created
+    const steps = getSteps(editor);
+    expect(steps.length).toBe(1);
+
+    // Check that step items were created
+    const stepItems = getStepItems(editor);
+    expect(stepItems.length).toBe(1);
+
+    // Check that title was extracted
+    const stepTitles = getStepTitles(editor);
+    expect(stepTitles[0].node.textContent).toBe("Title");
+
+    // Check that content was preserved
+    const stepContents = getStepContents(editor);
+    expect(stepContents[0].node.textContent).toBe("Content 1Content 2");
+  });
+
+  it("creates empty steps when no content is selected", () => {
+    // Convert to steps
+    editor.commands.setSteps();
+
+    // Check that steps were created
+    const steps = getSteps(editor);
+    expect(steps.length).toBe(1);
+
+    // Check that step items were created
+    const stepItems = getStepItems(editor);
+    expect(stepItems.length).toBe(1);
+
+    // Check that title is empty
+    const stepTitles = getStepTitles(editor);
+    expect(stepTitles[0].node.textContent).toBe("");
+
+    // Check that content is empty
+    const stepContents = getStepContents(editor);
+    expect(stepContents[0].node.textContent).toBe("");
+  });
+
+  it("converts steps back to paragraphs", () => {
+    // Create steps
+    editor.commands.setSteps();
+
+    // Focus at the start of the step title
+    const stepTitles = getStepTitles(editor);
+    editor.commands.focus(stepTitles[0].pos);
+
+    // Add a title
+    editor.commands.insertContent("Title");
+
+    // Press enter to jump to contents
+    editor.view.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+    // Add content
+    editor.commands.insertContent("Content");
+
+    // Convert back to paragraphs
+    editor.commands.unsetSteps();
+
+    // Check that steps were removed
+    const steps = getSteps(editor);
+    expect(steps.length).toBe(0);
+
+    // Check that paragraphs were created
+    const doc = editor.state.doc;
+    expect(doc.firstChild?.type.name).toBe("paragraph");
+    expect(doc.firstChild?.textContent).toBe("Title");
+
+    // Check that content was preserved
+    expect(doc.lastChild?.type.name).toBe("paragraph");
+    expect(doc.lastChild?.textContent).toBe("Content");
+  });
+
+  it("handles errors gracefully in unsetSteps", () => {
+    // No steps exist
+    const steps = getSteps(editor);
+    expect(steps.length).toBe(0);
+
+    // Try to unset steps when no steps exist (should fail gracefully)
+    const result = editor.commands.unsetSteps();
+    expect(result).toBe(false);
+
+    // Confirm that steps are still not created
+    const stepsAfterUnset = getSteps(editor);
+    expect(stepsAfterUnset.length).toBe(0);
   });
 });

@@ -33,7 +33,7 @@ h1 {
 }
 
 p {
-  margin: 0.5rem 0;
+  margin: 0;
 }
 
 button {
@@ -126,5 +126,14 @@ div[data-type='step-title'] {
 
 div[data-type='step-content'] {
   grid-area: content;
-  padding-block-end: 1.5rem;
+  padding-block: 0.5rem 1.5rem;
+}
+
+div[data-type='step-title'].is-empty::before,
+div[data-type='step-content'].is-empty::before {
+  content: attr(data-placeholder);
+  color: #00000050;
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

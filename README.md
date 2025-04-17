@@ -14,7 +14,7 @@ A step-by-step guide extension for [Tiptap](https://tiptap.dev/).
 npm install tiptap-steps
 ```
 
-### Usage
+## Usage
 
 This package is separated into 4 main extensions:
 
@@ -23,7 +23,7 @@ This package is separated into 4 main extensions:
 3. `StepTitle`: The title for an item
 4. `StepContent`: The contents for an item
 
-In order to insert and use steps, one or more nodes within your document need to accept the `"steps"` content type.
+In order to insert and use steps, one or more nodes within your document need to accept the `"steps"` [content type](https://tiptap.dev/docs/editor/core-concepts/schema#content).
 
 ```tsx
 import { useEditor, EditorContent } from "@tiptap/react";
@@ -38,7 +38,7 @@ const Editor = () => {
         document: false,
       }),
       Document.extend({
-        // Change from "block+" (default) to accept steps
+        // Change from "block+" (default)
         content: "(block | steps)+", 
       }),
       // Pass in the steps extensions
@@ -55,6 +55,8 @@ const Editor = () => {
 
 export default Editor;
 ```
+
+### Styling
 
 If you want the steps to look like the example, add this CSS to your app:
 
@@ -122,3 +124,66 @@ div[data-type="step-content"] {
   padding-block-end: 1.5rem;
 }
 ```
+
+### Placeholders
+
+If you want to display placeholder text for the title or description, add the [Tiptap Placeholder extension](https://tiptap.dev/docs/editor/extensions/functionality/placeholder):
+
+```zsh
+npm install @tiptap/extension-placeholder
+```
+
+Then add it to your editor config:
+
+```tsx
+import Placeholder from "@tiptap/extension-placeholder";
+
+const Editor = () => {
+  const editor = useEditor({
+    extensions: [
+      // ...other document extensions
+      Placeholder.configure({
+        includeChildren: true,
+        showOnlyCurrent: false, 
+        placeholder: ({ node }) => {
+          // Return different placeholders depending on node type
+          if (node.type.name === "stepTitle") {
+            return "Add a title…";
+          }
+    
+          if (node.type.name === "stepContent") {
+            return "Add instructions…";
+          }
+    
+          return "Write something…";
+        },
+      }),
+      // Pass in the steps extensions
+      Steps,
+      StepItem,
+      StepTitle,
+      StepContent
+    ]
+  });
+
+  return <EditorContent editor={editor} />;
+};
+
+export default Editor;
+```
+
+The placeholder is unstyled by default, so be sure to add CSS styles:
+
+```css
+div[data-type='step-title'].is-empty::before,
+div[data-type='step-content'].is-empty::before {
+  content: attr(data-placeholder);
+  color: #00000050;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+```
+
+Read more about the [Tiptap placeholder extension](https://tiptap.dev/docs/editor/extensions/functionality/placeholder).
+

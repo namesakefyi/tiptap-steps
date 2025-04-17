@@ -20,7 +20,6 @@ describe("StepContent", () => {
 
     const html = editor.getHTML();
     expect(html).toMatch(/div data-type="step-content"/);
-    expect(html).toMatch(/data-placeholder="Add step instructions…"/);
   });
 
   it("handles Backspace key at start of content", () => {
@@ -42,9 +41,10 @@ describe("StepContent", () => {
 
     // Focus at the start of the content
     const stepContents = getStepContents(editor);
-    editor.commands.focus(stepContents[0].pos + 1);
+    editor.commands.focus(stepContents[0].pos + 2);
 
-    expect(editor.state.selection.$from.parent.type.name).toBe("stepContent");
+    // Paragraph within content
+    expect(editor.state.selection.$from.parent.type.name).toBe("paragraph");
 
     // Simulate Backspace key
     editor.view.dispatchEvent(
@@ -60,5 +60,33 @@ describe("StepContent", () => {
 
     const stepContentsAfterBackspace = getStepContents(editor);
     expect(stepContentsAfterBackspace[0].node.textContent).toBe("Content");
+  });
+
+  it("handles Enter key at end of empty content", () => {
+    // Create a steps node with a step item
+    editor.commands.setSteps();
+
+    // Focus at the start of the step title
+    const stepTitles = getStepTitles(editor);
+    editor.commands.focus(stepTitles[0].pos);
+
+    // Add a title
+    editor.commands.insertContent("Title");
+
+    // Press enter to jump to contents
+    editor.view.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+    // Focus at the end of the content
+    const stepContents = getStepContents(editor);
+    const endOfContent =
+      stepContents[0].pos + stepContents[0].node.content.size;
+    editor.commands.focus(endOfContent);
+
+    // Simulate Enter key at end of empty content
+    editor.view.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+    // Should add a new step
+    const stepItems = getStepItems(editor);
+    expect(stepItems.length).toBe(2);
   });
 });

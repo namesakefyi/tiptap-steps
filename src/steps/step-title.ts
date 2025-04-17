@@ -1,8 +1,12 @@
-import { Node, findParentNode, mergeAttributes } from "@tiptap/core";
+import {
+  Node,
+  type NodeConfig,
+  findParentNode,
+  mergeAttributes,
+} from "@tiptap/core";
 
 export interface StepTitleOptions {
   HTMLAttributes: Record<string, any>;
-  placeholder?: string;
 }
 
 export const StepTitle = Node.create<StepTitleOptions>({
@@ -25,10 +29,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
     return [
       "div",
       mergeAttributes(
-        {
-          "data-type": "step-title",
-          "data-placeholder": "Step title",
-        },
+        { "data-type": "step-title" },
         this.options.HTMLAttributes,
         HTMLAttributes,
       ),
@@ -64,6 +65,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
 
           const isFirstStep = stepItem.start === steps.start + 1;
           const isCursorAtStartOfStepTitle = $to.pos === stepTitle.start;
+          const titleHasContent = stepTitle.node.textContent.trim() !== "";
           const posBeforeSteps = steps.start - 1;
 
           // If we're at the start of the first step title, insert paragraph above steps
@@ -73,6 +75,11 @@ export const StepTitle = Node.create<StepTitleOptions>({
               .insertContentAt(posBeforeSteps, { type: "paragraph" })
               .focus(posBeforeSteps)
               .run();
+          }
+
+          // If we're at the start of a step title after the first item, insert a step item
+          if (!isFirstStep && isCursorAtStartOfStepTitle && titleHasContent) {
+            return editor.chain().addStepBefore().run();
           }
 
           const isLastStep =
@@ -104,12 +111,9 @@ export const StepTitle = Node.create<StepTitleOptions>({
             );
           }
 
-          // TODO: There's a way to not have to calculate this logic, I'm sure of it
-          // Research "isolation" in Tiptap
-
           const endOfTitle = stepTitle.start + stepTitle.node.content.size;
-          // +2 for end token of title + start token of content
-          const startOfContent = endOfTitle + 2;
+          // +3 for end token of title + start token of content + start of paragraph
+          const startOfContent = endOfTitle + 3;
 
           // If cursor is at the end of the title text, just move to content
           if ($to.pos === endOfTitle) {
@@ -120,7 +124,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
           return editor
             .chain()
             .cut({ from: $to.pos, to: endOfTitle }, startOfContent)
-            .focus(startOfContent)
+            .focus(startOfContent - (endOfTitle - $to.pos))
             .run();
         } catch (error) {
           console.error(error);

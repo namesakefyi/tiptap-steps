@@ -13,6 +13,11 @@ declare module "@tiptap/core" {
       addStep: () => ReturnType;
 
       /**
+       * Add a new step before the current step.
+       */
+      addStepBefore: () => ReturnType;
+
+      /**
        * Delete the current step.
        */
       deleteStep: () => ReturnType;
@@ -75,6 +80,42 @@ export const StepItem = Node.create<StepItemOptions>({
 
             return chain()
               .insertContentAt(positionAfterCurrentItem, {
+                type: this.name,
+                content: [
+                  {
+                    type: "stepTitle",
+                  },
+                  {
+                    type: "stepContent",
+                    content: [{ type: "paragraph" }],
+                  },
+                ],
+              })
+              .focus(startOfNewStep)
+              .run();
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        },
+
+      addStepBefore:
+        () =>
+        ({ state, chain }) => {
+          try {
+            const currentStep = findParentNode(
+              (node) => node.type.name === "stepItem",
+            )(state.selection);
+
+            if (!currentStep) return false;
+
+            const positionBeforeCurrentItem = currentStep.pos - 1;
+
+            // +1 moves cursor over the start token and into the title
+            const startOfNewStep = positionBeforeCurrentItem + 2;
+
+            return chain()
+              .insertContentAt(positionBeforeCurrentItem, {
                 type: this.name,
                 content: [
                   {

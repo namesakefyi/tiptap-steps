@@ -2,7 +2,6 @@ import { Node, findParentNode, mergeAttributes } from "@tiptap/core";
 
 export interface StepContentOptions {
   HTMLAttributes: Record<string, string>;
-  placeholder?: string;
 }
 
 export const StepContent = Node.create<StepContentOptions>({
@@ -24,10 +23,7 @@ export const StepContent = Node.create<StepContentOptions>({
     return [
       "div",
       mergeAttributes(
-        {
-          "data-type": "step-content",
-          "data-placeholder": "Add step instructions…",
-        },
+        { "data-type": "step-content" },
         this.options.HTMLAttributes,
         HTMLAttributes,
       ),
