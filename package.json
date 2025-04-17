@@ -1,6 +1,6 @@
 {
   "name": "tiptap-steps",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A step-by-step guide extension for Tiptap",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -25,9 +25,16 @@
     "import": "./dist/index.js",
     "require": "./dist/index.cjs"
   },
-  "keywords": ["tiptap", "tiptap extension", "tiptap steps", "prosemirror"],
+  "keywords": [
+    "tiptap",
+    "tiptap extension",
+    "tiptap steps",
+    "prosemirror"
+  ],
   "author": "Eva Decker",
-  "files": ["dist/"],
+  "files": [
+    "dist/"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
