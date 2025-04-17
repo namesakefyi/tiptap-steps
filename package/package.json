@@ -1,6 +1,6 @@
 {
 	"name": "tiptap-steps",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A step-by-step guide extension for Tiptap",
 	"main": "dist/index.js",
 	"module": "dist/index.js",

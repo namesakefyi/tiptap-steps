@@ -1,5 +1,11 @@
 # tiptap-steps
 
+## 1.0.3
+
+### Patch Changes
+
+- 8f80f7c: Tag GitHub releases before publish
+
 ## 1.0.2
 
 ### Patch Changes
