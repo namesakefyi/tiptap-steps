@@ -1,4 +1,4 @@
-import { Steps, StepItem, StepTitle, StepContent } from '../../../src';
+import { Steps, StepItem, StepTitle, StepContent } from 'tiptap-steps';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
