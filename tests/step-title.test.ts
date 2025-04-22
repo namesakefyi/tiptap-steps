@@ -4,7 +4,6 @@ import {
   getStepContents,
   getStepItems,
   getStepTitles,
-  getSteps,
   newEditor,
 } from "./utils";
 
@@ -16,15 +15,14 @@ describe("StepTitle", () => {
   });
 
   it("renders with correct HTML attributes", () => {
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     const html = editor.getHTML();
     expect(html).toMatch(/div data-type="step-title"/);
   });
 
   it("handles Enter key at end of title", () => {
-    // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);
@@ -50,8 +48,7 @@ describe("StepTitle", () => {
   });
 
   it("handles Enter key in the middle of title", () => {
-    // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);
@@ -77,8 +74,7 @@ describe("StepTitle", () => {
   });
 
   it("handles Enter key at start of first step title", () => {
-    // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);
@@ -93,11 +89,8 @@ describe("StepTitle", () => {
   });
 
   it("handles Enter key at start of non-first step title", () => {
-    // Create a steps node with two step items
-    editor.commands.setSteps();
-
-    // Add a second step
-    editor.commands.addStep();
+    editor.commands.toggleSteps();
+    editor.commands.insertStep();
 
     // Focus at the start of the second step title
     const stepTitles = getStepTitles(editor);
@@ -112,8 +105,7 @@ describe("StepTitle", () => {
   });
 
   it("handles Backspace key in step title", () => {
-    // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);

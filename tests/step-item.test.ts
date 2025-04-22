@@ -17,7 +17,7 @@ describe("StepItem", () => {
   });
 
   it("creates a step item with title and content", () => {
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
     const stepItems = getStepItems(editor);
     expect(stepItems).toHaveLength(1);
     expect(stepItems[0].node.childCount).toBe(2);
@@ -26,8 +26,8 @@ describe("StepItem", () => {
   });
 
   it("adds a new step after the current step", () => {
-    editor.commands.setSteps();
-    editor.commands.addStep();
+    editor.commands.toggleSteps();
+    editor.commands.insertStep();
 
     const steps = getSteps(editor);
     expect(steps).toHaveLength(1);
@@ -44,15 +44,15 @@ describe("StepItem", () => {
   });
 
   it("deletes an empty step", () => {
-    editor.commands.setSteps();
-    editor.commands.addStep();
+    editor.commands.toggleSteps();
+    editor.commands.insertStep();
 
     // Move to the second step and ensure it's selected
     editor.commands.selectAll();
     editor.commands.focus("end");
 
     // Delete the step
-    const didDelete = editor.commands.deleteStep();
+    const didDelete = editor.commands.removeStep();
     expect(didDelete).toBe(true);
 
     // After deletion, we should have a paragraph node
@@ -64,8 +64,8 @@ describe("StepItem", () => {
 
   it("does not delete a step with content", () => {
     // Create a steps node with two steps
-    editor.commands.setSteps();
-    editor.commands.addStep();
+    editor.commands.toggleSteps();
+    editor.commands.insertStep();
 
     // Add content to the second step
     editor.commands.selectAll();
@@ -73,7 +73,7 @@ describe("StepItem", () => {
     editor.commands.insertContent("Step content");
 
     // Try to delete the step
-    const didDelete = editor.commands.deleteStep();
+    const didDelete = editor.commands.removeStep();
     expect(didDelete).toBe(false);
 
     const steps = getSteps(editor);
@@ -84,10 +84,10 @@ describe("StepItem", () => {
 
   it("deletes entire steps node when deleting last empty step", () => {
     // Create a steps node with one step
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Delete the step
-    const didDelete = editor.commands.deleteStep();
+    const didDelete = editor.commands.removeStep();
     expect(didDelete).toBe(true);
 
     const json = editor.getJSON();
@@ -98,7 +98,7 @@ describe("StepItem", () => {
 
   it("adds a new step at the end of the list", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Get initial step count
     const initialStepItems = getStepItems(editor);
@@ -112,7 +112,7 @@ describe("StepItem", () => {
     editor.commands.insertContent("First Step");
 
     // Add a new step
-    editor.commands.addStep();
+    editor.commands.insertStep();
 
     // Check that a new step was added
     const stepItems = getStepItems(editor);
@@ -125,7 +125,7 @@ describe("StepItem", () => {
 
   it("adds a new step before the current step", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Get initial step count
     const initialStepItems = getStepItems(editor);
@@ -139,7 +139,7 @@ describe("StepItem", () => {
     editor.commands.insertContent("First Step");
 
     // Add a new step before
-    editor.commands.addStepBefore();
+    editor.commands.insertStep({ before: true });
 
     // Check that a new step was added
     const stepItems = getStepItems(editor);
@@ -152,7 +152,7 @@ describe("StepItem", () => {
 
   it("deletes an empty step", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Get initial step count
     const initialStepItems = getStepItems(editor);
@@ -163,7 +163,7 @@ describe("StepItem", () => {
     editor.commands.focus(stepTitles[0].pos);
 
     // Delete the step
-    editor.commands.deleteStep();
+    editor.commands.removeStep();
 
     // Check that the step was deleted
     const stepItems = getStepItems(editor);
@@ -172,7 +172,7 @@ describe("StepItem", () => {
 
   it("does not delete a step with content", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Get initial step count
     const initialStepItems = getStepItems(editor);
@@ -192,7 +192,7 @@ describe("StepItem", () => {
     editor.commands.insertContent("Content");
 
     // Try to delete the step
-    editor.commands.deleteStep();
+    editor.commands.removeStep();
 
     // Check that the step was not deleted
     const stepItems = getStepItems(editor);
@@ -201,7 +201,7 @@ describe("StepItem", () => {
 
   it("deletes the entire steps list when deleting the last empty step", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Get initial step count
     const initialStepItems = getStepItems(editor);
@@ -212,7 +212,7 @@ describe("StepItem", () => {
     editor.commands.focus(stepTitles[0].pos);
 
     // Delete the step
-    editor.commands.deleteStep();
+    editor.commands.removeStep();
 
     // Check that the steps node was deleted
     const steps = editor.state.doc.content.content.filter(
