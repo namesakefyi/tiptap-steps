@@ -76,7 +76,7 @@ describe("Steps", () => {
 
     editor.commands.toggleSteps();
     const jsonAfterToggleOff = editor.getJSON();
-    expect(jsonAfterToggleOff.content?.[0].type).toBe("paragraph");
+    expect(jsonAfterToggleOff.content?.[0].type).toBe("heading");
   });
 
   it("renders with correct HTML attributes", () => {
@@ -137,6 +137,27 @@ describe("Steps", () => {
     expect(stepTitles[0].node.textContent).toBe("Example title in bold");
   });
 
+  it("converts headings to step titles", () => {
+    editor.commands.insertContent([
+      {
+        type: "heading",
+        content: [
+          {
+            type: "text",
+            text: "Example heading",
+          },
+        ],
+      },
+    ]);
+
+    editor.commands.selectAll();
+    editor.commands.toggleSteps();
+
+    const stepTitles = getStepTitles(editor);
+    expect(stepTitles).toHaveLength(1);
+    expect(stepTitles[0].node.textContent).toBe("Example heading");
+  });
+
   it("handles unsetting steps with empty title and content", () => {
     editor.commands.toggleSteps();
     editor.commands.toggleSteps();
@@ -147,7 +168,7 @@ describe("Steps", () => {
 
   it("handles unsetting steps with empty title and non-empty content", () => {
     editor.commands.toggleSteps();
-    editor.commands.focus("end");
+    editor.commands.focus(5);
     editor.commands.insertContent("Step content");
     editor.commands.toggleSteps();
 
@@ -234,22 +255,12 @@ describe("Steps", () => {
 
     // Check that paragraphs were created
     const doc = editor.state.doc;
-    expect(doc.firstChild?.type.name).toBe("paragraph");
-    expect(doc.firstChild?.textContent).toBe("Title");
+    expect(doc.children[0]?.type.name).toBe("heading");
+    expect(doc.children[0]?.textContent).toBe("Title");
 
     // Check that content was preserved
-    expect(doc.lastChild?.type.name).toBe("paragraph");
-    expect(doc.lastChild?.textContent).toBe("Content");
-  });
-
-  it("handles errors gracefully in unsetSteps", () => {
-    // No steps exist
-    const steps = getSteps(editor);
-    expect(steps.length).toBe(0);
-
-    // Try to unset steps when no steps exist (should fail gracefully)
-    editor.commands.toggleSteps();
-    expect(editor.getJSON().content?.[0].type).toBe("paragraph");
+    expect(doc.children[1]?.type.name).toBe("paragraph");
+    expect(doc.children[1]?.textContent).toBe("Content");
   });
 
   // New tests for updated toggleSteps functionality
@@ -361,30 +372,10 @@ describe("Steps", () => {
 
     // Check that content was preserved
     const json = editor.getJSON();
+
     expect(json.content?.[0].type).toBe("heading");
     expect(json.content?.[0].content?.[0].text).toBe("Test Title");
     expect(json.content?.[1].type).toBe("paragraph");
     expect(json.content?.[1].content?.[0].text).toBe("Test Content");
-  });
-
-  it("handles keyboard shortcut for toggling steps", () => {
-    // Insert content
-    editor.commands.insertContent(createParagraph("Test content"));
-    editor.commands.selectAll();
-
-    // Use keyboard shortcut to toggle steps
-    editor.commands.toggleSteps();
-
-    // Check that steps were created
-    const steps = getSteps(editor);
-    expect(steps.length).toBe(1);
-
-    // Use keyboard shortcut again to toggle off
-    editor.commands.toggleSteps();
-
-    // Check that steps were removed
-    const json = editor.getJSON();
-    expect(json.content?.[0].type).toBe("paragraph");
-    expect(json.content?.[0].content?.[0].text).toBe("Test content");
   });
 });

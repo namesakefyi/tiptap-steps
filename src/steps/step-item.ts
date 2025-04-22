@@ -152,15 +152,13 @@ export const StepItem = Node.create<StepItemOptions>({
                 ? options.content
                 : [{ type: "paragraph" }];
 
-            const innerContent = [
-              {
-                type: this.name,
-                content: [
-                  { type: "stepTitle", content: titleToInsert },
-                  { type: "stepContent", content: contentToInsert },
-                ],
-              },
-            ];
+            const innerContent: JSONContent = {
+              type: this.name,
+              content: [
+                { type: "stepTitle", content: titleToInsert },
+                { type: "stepContent", content: contentToInsert },
+              ],
+            };
 
             // Check if we need to wrap in a steps node
             const needsStepsWrapper = !findParentNode(
@@ -178,8 +176,8 @@ export const StepItem = Node.create<StepItemOptions>({
                 positionToInsert,
                 state.schema.nodeFromJSON(
                   needsStepsWrapper
-                    ? { type: "steps", content: innerContent }
-                    : innerContent[0],
+                    ? { type: "steps", content: [innerContent] }
+                    : innerContent,
                 ),
               );
 
@@ -215,9 +213,11 @@ export const StepItem = Node.create<StepItemOptions>({
 
             if (!title || !content) return false;
 
+            const contentToPreserve: JSONContent = [];
+
             const hasTitle = title.textContent.length > 0;
-            const heading = hasTitle && [
-              {
+            if (hasTitle) {
+              contentToPreserve.push({
                 type: "heading",
                 attrs: {
                   level: 2,
@@ -228,9 +228,17 @@ export const StepItem = Node.create<StepItemOptions>({
                     text: title.textContent,
                   },
                 ],
-              },
-            ];
+              });
+            }
 
+            const stepContent = content.content.toJSON();
+            const hasContent = stepContent && stepContent.length > 0;
+            if (hasContent) {
+              contentToPreserve.push(...stepContent);
+            }
+
+            const isNotEmpty = hasTitle || hasContent;
+            const isLastStep = steps?.node.children.length === 1;
             const isFirstChild = steps?.node.firstChild === stepItem.node;
 
             const positionToInsert = Math.max(
@@ -242,17 +250,24 @@ export const StepItem = Node.create<StepItemOptions>({
             const positionToFocus = positionToInsert;
 
             if (dispatch) {
-              // Delete the step item
-              tr.delete(stepItem.pos, stepItem.pos + stepItem.node.nodeSize);
+              if (isLastStep) {
+                // If this is the last step, delete the container steps
+                tr.delete(steps.pos, steps.pos + steps.node.nodeSize);
+              } else {
+                // Otherwise just delete the step item
+                tr.delete(stepItem.pos, stepItem.pos + stepItem.node.nodeSize);
+              }
 
-              // Insert the preserved content
-              tr.insert(
-                positionToInsert,
-                state.schema.nodeFromJSON([
-                  ...(heading || []),
-                  ...(content.content.toJSON() || []),
-                ]),
-              );
+              if (isNotEmpty) {
+                // If there's content to insert, insert it
+                tr.insert(
+                  positionToInsert,
+                  state.schema.nodeFromJSON({
+                    type: "doc",
+                    content: contentToPreserve,
+                  }),
+                );
+              }
 
               // Join lists if needed
               joinListBackwards(tr);
