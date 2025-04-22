@@ -1,12 +1,12 @@
 import type { Editor } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 import {
+  createBasicStep,
   getStepContents,
   getStepItems,
   getStepTitles,
-  newEditor,
   getSteps,
-  createBasicStep,
+  newEditor,
 } from "./utils";
 
 describe("StepTitle", () => {
