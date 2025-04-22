@@ -86,10 +86,10 @@ declare module "@tiptap/core" {
 
 export const StepItem = Node.create<StepItemOptions>({
   name: "stepItem",
-  group: "listItem",
+  group: "stepItem",
   content: "stepTitle stepContent",
   inline: false,
-  defining: true,
+  defining: false,
   draggable: false,
 
   addOptions() {
@@ -247,7 +247,7 @@ export const StepItem = Node.create<StepItemOptions>({
               // account for the steps list start token
               isFirstChild ? stepItem.pos - 1 : stepItem.pos,
             );
-            const positionToFocus = positionToInsert;
+            const positionToFocus = Math.max(1, positionToInsert - 1);
 
             if (dispatch) {
               if (isLastStep) {

@@ -98,17 +98,14 @@ export const StepTitle = Node.create<StepTitleOptions>({
             );
             if (!steps) return false;
 
-            const posAfterSteps = steps.pos + steps.node.nodeSize;
-            return (
-              editor
-                .chain()
-                .insertContentAt(posAfterSteps, {
-                  type: "paragraph",
-                })
-                // +2 for end token of steps + start token of new paragraph
-                .focus(posAfterSteps + 2)
-                .run()
-            );
+            const posAfterSteps = steps.start + steps.node.nodeSize;
+            return editor
+              .chain()
+              .insertContentAt(posAfterSteps, {
+                type: "paragraph",
+              })
+              .focus(posAfterSteps)
+              .run();
           }
 
           const endOfTitle = stepTitle.start + stepTitle.node.content.size;

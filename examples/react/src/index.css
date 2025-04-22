@@ -59,6 +59,11 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 .tiptap {
   margin-top: 1rem;
   border: 1px solid #cccccc;

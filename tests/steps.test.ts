@@ -321,37 +321,63 @@ describe("Steps", () => {
 
   it("handles removing multiple selected step items", () => {
     // Create multiple steps
-    editor.commands.insertContent([
-      createBasicStep("Step 1", "Content 1"),
-      createBasicStep("Step 2", "Content 2"),
-      createBasicStep("Step 3", "Content 3"),
-    ]);
+    editor.commands.insertContent([createBasicStep("Step 1", "Content 1")]);
 
-    // Select the middle step
+    editor.commands.insertStep({
+      title: "Step 2",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Content 2" }],
+        },
+      ],
+    });
+
+    editor.commands.insertStep({
+      title: "Step 3",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Content 3" }],
+        },
+      ],
+    });
+
+    const steps = getSteps(editor);
+    expect(steps.length).toBe(1);
+
     const stepItems = getStepItems(editor);
+    expect(stepItems.length).toBe(3);
+
+    // Select all steps
     editor.commands.setTextSelection({
-      from: stepItems[1].pos,
-      to: stepItems[1].pos + stepItems[1].node.nodeSize,
+      from: 0,
+      to: stepItems[2].pos + stepItems[2].node.nodeSize,
     });
 
     // Toggle steps to remove the selected step
     editor.commands.toggleSteps();
 
-    // Check that only the selected step was removed
+    // Check that no steps remain
     const remainingSteps = getStepItems(editor);
-    expect(remainingSteps.length).toBe(2);
+    expect(remainingSteps.length).toBe(0);
 
-    // Check that the content of the removed step was preserved
+    // Check that the content of all removed steps was preserved
     const json = editor.getJSON();
-    expect(json.content?.[0].type).toBe("steps");
-    expect(json.content?.[0].content?.[0].type).toBe("stepItem");
-    expect(json.content?.[0].content?.[1].type).toBe("stepItem");
+    expect(json.content?.[0].type).toBe("heading");
+    expect(json.content?.[0].content?.[0].text).toBe("Step 1");
+    expect(json.content?.[1].type).toBe("paragraph");
+    expect(json.content?.[1].content?.[0].text).toBe("Content 1");
 
-    // Check that the content after the steps was preserved
-    expect(json.content?.[1].type).toBe("heading");
-    expect(json.content?.[1].content?.[0].text).toBe("Step 2");
-    expect(json.content?.[2].type).toBe("paragraph");
-    expect(json.content?.[2].content?.[0].text).toBe("Content 2");
+    expect(json.content?.[2].type).toBe("heading");
+    expect(json.content?.[2].content?.[0].text).toBe("Step 2");
+    expect(json.content?.[3].type).toBe("paragraph");
+    expect(json.content?.[3].content?.[0].text).toBe("Content 2");
+
+    expect(json.content?.[4].type).toBe("heading");
+    expect(json.content?.[4].content?.[0].text).toBe("Step 3");
+    expect(json.content?.[5].type).toBe("paragraph");
+    expect(json.content?.[5].content?.[0].text).toBe("Content 3");
   });
 
   it("handles empty selection when toggling steps", () => {

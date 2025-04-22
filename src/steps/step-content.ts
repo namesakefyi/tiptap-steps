@@ -7,7 +7,7 @@ export interface StepContentOptions {
 export const StepContent = Node.create<StepContentOptions>({
   name: "stepContent",
   content: "block+",
-  defining: true,
+  defining: false,
   selectable: false,
 
   parseHTML() {

@@ -22,10 +22,10 @@ export interface StepsOptions {
 
 export const Steps = Node.create<StepsOptions>({
   name: "steps",
-  group: "steps list",
+  group: "steps",
   content: "stepItem+",
   inline: false,
-  defining: true,
+  defining: false,
 
   addOptions() {
     return {
@@ -114,7 +114,7 @@ export const Steps = Node.create<StepsOptions>({
                 }
               }
 
-              // Now perform the operations in a single chain
+              // Now perform the operations
               return chainCommand()
                 .deleteRange({
                   from: Math.max(0, range.start - 1),
@@ -126,31 +126,26 @@ export const Steps = Node.create<StepsOptions>({
                 )
                 .run();
             }
-          } else {
-            // If we're not removing steps, we're creating new ones
-            let titleToInsert = "";
-            let contentToInsert: JSONContent[] = [];
-
-            // Try to get a title from the selected content
-            const [firstNode, ...remainingNodes] = selectedContent;
-
-            if (
-              firstNode?.type &&
-              ALLOWED_TITLE_TYPES.includes(firstNode.type)
-            ) {
-              titleToInsert = firstNode.content?.[0]?.text || "";
-              contentToInsert = remainingNodes;
-            } else {
-              contentToInsert = selectedContent;
-            }
-
-            return chainCommand()
-              .deleteRange({ from: range.start, to: range.end })
-              .insertStep({ title: titleToInsert, content: contentToInsert })
-              .run();
           }
 
-          return false;
+          // If there is not parent step container, create steps
+          let titleToInsert = "";
+          let contentToInsert: JSONContent[] = [];
+
+          // Try to get a title from the selected content
+          const [firstNode, ...remainingNodes] = selectedContent;
+
+          if (firstNode?.type && ALLOWED_TITLE_TYPES.includes(firstNode.type)) {
+            titleToInsert = firstNode.content?.[0]?.text || "";
+            contentToInsert = remainingNodes;
+          } else {
+            contentToInsert = selectedContent;
+          }
+
+          return chainCommand()
+            .deleteRange({ from: range.start, to: range.end })
+            .insertStep({ title: titleToInsert, content: contentToInsert })
+            .run();
         },
     };
   },
