@@ -30,8 +30,8 @@ importers:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
       tiptap-steps:
-        specifier: ../../
-        version: link:../..
+        specifier: ^2.0.0
+        version: 2.0.0(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))
     devDependencies:
       '@eslint/js':
         specifier: ^9.22.0
@@ -1258,6 +1258,11 @@ packages:
 
   tippy.js@6.3.7:
     resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
+
+  tiptap-steps@2.0.0:
+    resolution: {integrity: sha512-2g3L24oGe/vBAvmOvz7lqs64f+DgZxgzV6e0dDazVVo4IgGCgS63/d3fdNspiIyy67HYxU2yPV4gPsMSJ4S6Rw==}
+    peerDependencies:
+      '@tiptap/core': ^2.11.7
 
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
@@ -2565,6 +2570,10 @@ snapshots:
   tippy.js@6.3.7:
     dependencies:
       '@popperjs/core': 2.11.8
+
+  tiptap-steps@2.0.0(@tiptap/core@2.11.7(@tiptap/pm@2.11.7)):
+    dependencies:
+      '@tiptap/core': 2.11.7(@tiptap/pm@2.11.7)
 
   to-regex-range@5.0.1:
     dependencies:
