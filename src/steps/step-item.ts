@@ -1,26 +1,91 @@
-import { Node, findParentNode, mergeAttributes } from "@tiptap/core";
+import {
+  type JSONContent,
+  Node,
+  findChildren,
+  findParentNode,
+  mergeAttributes,
+} from "@tiptap/core";
+import type { Transaction } from "@tiptap/pm/state";
+import { canJoin } from "@tiptap/pm/transform";
+import { TextSelection } from "@tiptap/pm/state";
+
+// https://github.com/ueberdosis/tiptap/blob/develop/packages/core/src/commands/toggleList.ts
+const joinListBackwards = (tr: Transaction): boolean => {
+  const steps = findParentNode((node) => node.type.name === "steps")(
+    tr.selection,
+  );
+  if (!steps) return true;
+
+  const before = tr.doc.resolve(Math.max(0, steps.pos - 1)).before(steps.depth);
+  if (before === undefined) return true;
+
+  const nodeBefore = tr.doc.nodeAt(before);
+  const canJoinBackwards =
+    steps.node.type === nodeBefore?.type && canJoin(tr.doc, steps.pos);
+  if (!canJoinBackwards) return true;
+
+  tr.join(steps.pos);
+  return true;
+};
+
+const joinListForwards = (tr: Transaction): boolean => {
+  const steps = findParentNode((node) => node.type.name === "steps")(
+    tr.selection,
+  );
+  if (!steps) return true;
+
+  const after = tr.doc.resolve(steps.start).after(steps.depth);
+  if (after === undefined) return true;
+
+  const nodeAfter = tr.doc.nodeAt(after);
+  const canJoinForwards =
+    steps.node.type === nodeAfter?.type && canJoin(tr.doc, after);
+  if (!canJoinForwards) return true;
+
+  tr.join(after);
+  return true;
+};
 
 export interface StepItemOptions {
   HTMLAttributes: Record<string, any>;
 }
 
 declare module "@tiptap/core" {
+  type InsertStepOptions = {
+    /**
+     * The title of the new step.
+     */
+    title?: string;
+
+    /**
+     * The content of the new step.
+     */
+    content?: JSONContent[];
+
+    /**
+     * Whether to add the new step before the current step.
+     * @default false
+     */
+    before?: boolean;
+  };
+
   interface Commands<ReturnType> {
     stepItem: {
       /**
-       * Add a new step after the current step.
+       * Add a new step after or before the current step.
+       * Optionally provide a title and content for the new step.
        */
-      addStep: () => ReturnType;
+      insertStep: (options?: InsertStepOptions) => ReturnType;
 
       /**
-       * Add a new step before the current step.
+       * Remove the current step, putting contents back into the parent.
        */
-      addStepBefore: () => ReturnType;
+      removeStep: () => ReturnType;
 
       /**
-       * Delete the current step.
+       * Toggle the current step between a list item and a paragraph.
        */
-      deleteStep: () => ReturnType;
+      toggleStep: () => ReturnType;
     };
   }
 }
@@ -29,6 +94,7 @@ export const StepItem = Node.create<StepItemOptions>({
   name: "stepItem",
   group: "listItem",
   content: "stepTitle stepContent",
+  inline: false,
   defining: true,
   draggable: false,
 
@@ -61,104 +127,141 @@ export const StepItem = Node.create<StepItemOptions>({
 
   addCommands() {
     return {
-      addStep:
-        () =>
-        ({ state, chain }) => {
+      insertStep:
+        (options) =>
+        ({ state, tr, dispatch }) => {
           try {
+            const shouldInsertBefore = options?.before ?? false;
+            const range = state.selection.$from.blockRange(state.selection.$to);
+            if (!range) return false;
+
+            // Find if we're inside a step
             const currentStep = findParentNode(
               (node) => node.type.name === "stepItem",
             )(state.selection);
 
-            if (!currentStep) return false;
+            // Calculate position once, preserving the original logic
+            const positionToInsert = currentStep
+              ? shouldInsertBefore
+                ? currentStep.pos
+                : currentStep.pos + currentStep.node.nodeSize
+              : range.start;
 
-            const positionAfterCurrentItem =
-              currentStep.pos + currentStep.node.nodeSize;
+            // Prepare content only once
+            const titleToInsert =
+              options?.title && options.title.length > 0
+                ? [{ type: "text", text: options.title }]
+                : undefined;
 
-            // +2 moves cursor over the end token and start token
-            // to the beginning of the new node
-            const startOfNewStep = positionAfterCurrentItem + 2;
+            const contentToInsert =
+              options?.content && options.content.length > 0
+                ? options.content
+                : [{ type: "paragraph" }];
 
-            return chain()
-              .insertContentAt(positionAfterCurrentItem, {
+            const innerContent = [
+              {
                 type: this.name,
                 content: [
-                  {
-                    type: "stepTitle",
-                  },
-                  {
-                    type: "stepContent",
-                    content: [{ type: "paragraph" }],
-                  },
+                  { type: "stepTitle", content: titleToInsert },
+                  { type: "stepContent", content: contentToInsert },
                 ],
-              })
-              .focus(startOfNewStep)
-              .run();
+              },
+            ];
+
+            // Check if we need to wrap in a steps node
+            const needsStepsWrapper = !findParentNode(
+              (node) => node.type.name === "steps",
+            )(state.selection);
+
+            const positionToFocus = needsStepsWrapper
+              ? positionToInsert + 3
+              : positionToInsert + 2;
+
+            // Create a single transaction for all operations
+            if (dispatch) {
+              // Insert the content
+              tr.insert(
+                positionToInsert,
+                state.schema.nodeFromJSON(
+                  needsStepsWrapper
+                    ? { type: "steps", content: innerContent }
+                    : innerContent[0],
+                ),
+              );
+
+              // Join lists if needed
+              joinListBackwards(tr);
+              joinListForwards(tr);
+
+              // Set selection
+              tr.setSelection(TextSelection.create(tr.doc, positionToFocus));
+            }
+
+            return true;
           } catch (error) {
             console.error(error);
             return false;
           }
         },
 
-      addStepBefore:
+      removeStep:
         () =>
-        ({ state, chain }) => {
-          try {
-            const currentStep = findParentNode(
-              (node) => node.type.name === "stepItem",
-            )(state.selection);
-
-            if (!currentStep) return false;
-
-            const positionBeforeCurrentItem = currentStep.pos - 1;
-
-            // +1 moves cursor over the start token and into the title
-            const startOfNewStep = positionBeforeCurrentItem + 2;
-
-            return chain()
-              .insertContentAt(positionBeforeCurrentItem, {
-                type: this.name,
-                content: [
-                  {
-                    type: "stepTitle",
-                  },
-                  {
-                    type: "stepContent",
-                    content: [{ type: "paragraph" }],
-                  },
-                ],
-              })
-              .focus(startOfNewStep)
-              .run();
-          } catch (error) {
-            console.error(error);
-            return false;
-          }
-        },
-
-      deleteStep:
-        () =>
-        ({ state, chain }) => {
+        ({ state, chain, tr }) => {
           try {
             const steps = findParentNode((node) => node.type.name === "steps")(
               state.selection,
             );
-            if (!steps) return false;
-
-            const currentStep = findParentNode(
+            const stepItem = findParentNode(
               (node) => node.type.name === "stepItem",
             )(state.selection);
-            if (!currentStep) return false;
+            if (!stepItem) return false;
 
-            // If the step has content, don't delete
-            const stepHasContent = currentStep.node.textContent.length > 0;
-            if (stepHasContent) return false;
+            const title = stepItem.node.firstChild;
+            const content = stepItem.node.lastChild;
 
-            // If this is the last step, delete the entire steps list node
-            const isLastStep = steps.node.content.childCount === 1;
-            if (isLastStep) return chain().deleteNode("steps").run();
+            if (!title || !content) return false;
+
+            const hasTitle = title.textContent.length > 0;
+            const heading = hasTitle && [
+              {
+                type: "heading",
+                attrs: {
+                  level: 2,
+                },
+                content: [
+                  {
+                    type: "text",
+                    text: title.textContent,
+                  },
+                ],
+              },
+            ];
+
+            const isFirstChild = steps?.node.firstChild === stepItem.node;
+            console.log(
+              "stepItem.node.childBefore(0)",
+              stepItem.node.childBefore(0),
+            );
+
+            const positionToInsert = Math.max(
+              0,
+              // If the step is the first child, we need to
+              // account for the steps list start token
+              isFirstChild ? stepItem.pos - 1 : stepItem.pos,
+            );
+            const positionToFocus = positionToInsert;
 
             // Otherwise, step is empty and can be safely deleted
-            return chain().deleteNode("stepItem").run();
+            return chain()
+              .deleteNode("stepItem")
+              .insertContentAt(positionToInsert, [
+                ...(heading || []),
+                ...(content.content.toJSON() || []),
+              ])
+              .command(() => joinListBackwards(tr))
+              .command(() => joinListForwards(tr))
+              .focus(positionToFocus)
+              .run();
           } catch (error) {
             console.error(error);
             return false;

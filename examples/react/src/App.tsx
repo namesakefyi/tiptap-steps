@@ -1,4 +1,4 @@
-import { Steps, StepItem, StepTitle, StepContent } from 'tiptap-steps';
+import { Steps, StepItem, StepTitle, StepContent } from '../../../src';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -22,6 +22,24 @@ function App() {
             className={editor.isActive('steps') ? 'is-active' : ''}
           >
             Toggle Steps
+          </button>
+          <button
+            onClick={() => editor.chain().focus().insertStep().run()}
+            disabled={!editor.can().chain().focus().insertStep().run()}
+          >
+            Insert Step
+          </button>
+          <button
+            onClick={() => editor.chain().focus().insertStep({ before: true }).run()}
+            disabled={!editor.can().chain().focus().insertStep({ before: true }).run()}
+          >
+            Insert Step Before
+          </button>
+          <button
+            onClick={() => editor.chain().focus().removeStep().run()}
+            disabled={!editor.can().chain().focus().removeStep().run()}
+          >
+            Remove Step
           </button>
         </div>
       </div>

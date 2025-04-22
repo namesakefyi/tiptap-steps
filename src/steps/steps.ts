@@ -1,10 +1,16 @@
-import { Node, findParentNode, mergeAttributes } from "@tiptap/core";
+import {
+  type JSONContent,
+  Node,
+  findChildren,
+  findParentNode,
+  mergeAttributes,
+} from "@tiptap/core";
+
+const ALLOWED_TITLE_TYPES = ["paragraph", "heading"];
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     steps: {
-      setSteps: () => ReturnType;
-      unsetSteps: () => ReturnType;
       toggleSteps: () => ReturnType;
     };
   }
@@ -18,6 +24,7 @@ export const Steps = Node.create<StepsOptions>({
   name: "steps",
   group: "steps list",
   content: "stepItem+",
+  inline: false,
   defining: true,
 
   addOptions() {
@@ -49,123 +56,101 @@ export const Steps = Node.create<StepsOptions>({
 
   addCommands() {
     return {
-      setSteps:
+      toggleSteps:
         () =>
-        ({ state, chain }) => {
+        ({ chain: chainCommand, state }) => {
           const range = state.selection.$from.blockRange(state.selection.$to);
-          if (!range) {
-            return false;
-          }
+          if (!range) return false;
 
-          // Get the selected content
+          const steps = findParentNode((node) => node.type.name === "steps")(
+            state.selection,
+          );
+
           const slice = state.doc.slice(range.start, range.end);
           const selectedContent =
             slice.content.size > 0 ? slice.toJSON().content : [];
 
-          // If no content, create empty step
-          if (selectedContent.length === 0) {
-            return chain()
+          // If we're inside a steps list, toggling will remove the list items
+          if (steps) {
+            const selectedStepItems = findChildren(
+              steps.node,
+              (node) => node.type.name === "stepItem",
+            ).filter((stepItem) => {
+              return (
+                stepItem.pos >= range.start - 1 &&
+                stepItem.pos + stepItem.node.content.size <= range.end
+              );
+            });
+
+            // If nothing is in the selection, run the default removeStep command
+            if (selectedStepItems.length === 0) {
+              return chainCommand().removeStep().run();
+            }
+
+            // If we have selected step items, remove them all
+            if (selectedStepItems.length > 0) {
+              // First collect all content that needs to be preserved
+              const contentToPreserve: JSONContent[] = [];
+
+              for (const stepItem of selectedStepItems) {
+                const title = stepItem.node.firstChild;
+                const content = stepItem.node.lastChild;
+
+                if (!title || !content) continue;
+
+                const hasTitle = title.textContent.length > 0;
+                if (hasTitle) {
+                  contentToPreserve.push({
+                    type: "heading",
+                    attrs: { level: 2 },
+                    content: [{ type: "text", text: title.textContent }],
+                  });
+                }
+
+                // Add the step content
+                const stepContent = content.content.toJSON();
+                if (stepContent && stepContent.length > 0) {
+                  contentToPreserve.push(...stepContent);
+                }
+              }
+
+              // Now perform the operations in a single chain
+              return chainCommand()
+                .deleteRange({
+                  from: Math.max(0, range.start - 1),
+                  to: range.end,
+                })
+                .insertContentAt(
+                  Math.max(0, range.start - 1),
+                  contentToPreserve,
+                )
+                .run();
+            }
+          } else {
+            // If we're not removing steps, we're creating new ones
+            let titleToInsert = "";
+            let contentToInsert: JSONContent[] = [];
+
+            // Try to get a title from the selected content
+            const [firstNode, ...remainingNodes] = selectedContent;
+
+            if (
+              firstNode?.type &&
+              ALLOWED_TITLE_TYPES.includes(firstNode.type)
+            ) {
+              titleToInsert = firstNode.content?.[0]?.text || "";
+              contentToInsert = remainingNodes;
+            } else {
+              contentToInsert = selectedContent;
+            }
+
+            return chainCommand()
               .deleteRange({ from: range.start, to: range.end })
-              .addStep()
+              .insertStep({ title: titleToInsert, content: contentToInsert })
               .run();
           }
 
-          // Check if first node is a paragraph that could be used as title
-          const [firstNode, ...remainingNodes] = selectedContent;
-          const titleContent =
-            firstNode.type === "paragraph" &&
-            (!firstNode.content || firstNode.content.length <= 1) &&
-            firstNode.content?.[0]?.type === "text"
-              ? [{ type: "text", text: firstNode.content?.[0]?.text || "" }]
-              : [];
-
-          const contentNodes =
-            firstNode.type === "paragraph" ? remainingNodes : selectedContent;
-
-          return chain()
-            .insertContentAt(
-              { from: range.start, to: range.end },
-              {
-                type: this.name,
-                content: [
-                  {
-                    type: "stepItem",
-                    content: [
-                      {
-                        type: "stepTitle",
-                        content: titleContent,
-                      },
-                      {
-                        type: "stepContent",
-                        content:
-                          contentNodes.length > 0
-                            ? contentNodes
-                            : [{ type: "paragraph" }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            )
-            .run();
-        },
-
-      unsetSteps:
-        () =>
-        ({ state, chain }) => {
-          const steps = findParentNode((node) => node.type === this.type)(
-            state.selection,
-          );
-          if (!steps) return false;
-
-          const range = {
-            from: steps.pos,
-            to: steps.pos + steps.node.nodeSize,
-          };
-
-          // Convert each step into paragraphs with bold titles
-          const content = steps.node.content.content.flatMap((stepItem) => {
-            const title = stepItem.firstChild;
-            const content = stepItem.lastChild;
-
-            if (!title || !content) {
-              return [];
-            }
-
-            const hasTitle = title.textContent.length > 0;
-            const boldTitle = hasTitle && [
-              {
-                type: "paragraph",
-                content: [
-                  {
-                    type: "text",
-                    marks: [{ type: "bold" }],
-                    text: title.textContent,
-                  },
-                ],
-              },
-            ];
-
-            return [...(boldTitle || []), ...(content.content.toJSON() || [])];
-          });
-
-          return chain()
-            .insertContentAt(range, content)
-            .setTextSelection(range.from)
-            .run();
-        },
-
-      toggleSteps:
-        () =>
-        ({ state, chain }) => {
-          const node = findParentNode((node) => node.type === this.type)(
-            state.selection,
-          );
-          if (node) {
-            return chain().unsetSteps().run();
-          }
-
-          return chain().setSteps().run();
+          return false;
         },
     };
   },

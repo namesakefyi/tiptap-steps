@@ -45,6 +45,7 @@
     "@tiptap/extension-italic": "^2.11.7",
     "@tiptap/extension-paragraph": "^2.11.7",
     "@tiptap/extension-text": "^2.11.7",
+    "@tiptap/pm": "^2.11.7",
     "@vitest/coverage-v8": "^3.1.1",
     "esbuild": "^0.25.2",
     "husky": "^9.1.7",

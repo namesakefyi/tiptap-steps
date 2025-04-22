@@ -3,3 +3,8 @@
   margin: 0 auto;
   padding: 2rem;
 }
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+}
