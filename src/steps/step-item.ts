@@ -1,13 +1,12 @@
 import {
   type JSONContent,
   Node,
-  findChildren,
   findParentNode,
   mergeAttributes,
 } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
-import { canJoin } from "@tiptap/pm/transform";
 import { TextSelection } from "@tiptap/pm/state";
+import { canJoin } from "@tiptap/pm/transform";
 
 // https://github.com/ueberdosis/tiptap/blob/develop/packages/core/src/commands/toggleList.ts
 const joinListBackwards = (tr: Transaction): boolean => {
@@ -81,11 +80,6 @@ declare module "@tiptap/core" {
        * Remove the current step, putting contents back into the parent.
        */
       removeStep: () => ReturnType;
-
-      /**
-       * Toggle the current step between a list item and a paragraph.
-       */
-      toggleStep: () => ReturnType;
     };
   }
 }
@@ -206,7 +200,7 @@ export const StepItem = Node.create<StepItemOptions>({
 
       removeStep:
         () =>
-        ({ state, chain, tr }) => {
+        ({ state, tr, dispatch }) => {
           try {
             const steps = findParentNode((node) => node.type.name === "steps")(
               state.selection,
@@ -238,10 +232,6 @@ export const StepItem = Node.create<StepItemOptions>({
             ];
 
             const isFirstChild = steps?.node.firstChild === stepItem.node;
-            console.log(
-              "stepItem.node.childBefore(0)",
-              stepItem.node.childBefore(0),
-            );
 
             const positionToInsert = Math.max(
               0,
@@ -251,17 +241,28 @@ export const StepItem = Node.create<StepItemOptions>({
             );
             const positionToFocus = positionToInsert;
 
-            // Otherwise, step is empty and can be safely deleted
-            return chain()
-              .deleteNode("stepItem")
-              .insertContentAt(positionToInsert, [
-                ...(heading || []),
-                ...(content.content.toJSON() || []),
-              ])
-              .command(() => joinListBackwards(tr))
-              .command(() => joinListForwards(tr))
-              .focus(positionToFocus)
-              .run();
+            if (dispatch) {
+              // Delete the step item
+              tr.delete(stepItem.pos, stepItem.pos + stepItem.node.nodeSize);
+
+              // Insert the preserved content
+              tr.insert(
+                positionToInsert,
+                state.schema.nodeFromJSON([
+                  ...(heading || []),
+                  ...(content.content.toJSON() || []),
+                ]),
+              );
+
+              // Join lists if needed
+              joinListBackwards(tr);
+              joinListForwards(tr);
+
+              // Set selection
+              tr.setSelection(TextSelection.create(tr.doc, positionToFocus));
+            }
+
+            return true;
           } catch (error) {
             console.error(error);
             return false;
