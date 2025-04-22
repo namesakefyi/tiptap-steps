@@ -25,26 +25,17 @@
     "import": "./dist/index.js",
     "require": "./dist/index.cjs"
   },
-  "keywords": [
-    "tiptap",
-    "tiptap extension",
-    "tiptap steps",
-    "prosemirror"
-  ],
+  "keywords": ["tiptap", "tiptap extension", "tiptap steps", "prosemirror"],
   "author": "Eva Decker",
-  "files": [
-    "dist/"
-  ],
+  "files": ["dist/"],
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@changesets/cli": "^2.29.1",
     "@tiptap/core": "^2.11.7",
-    "@tiptap/extension-bold": "^2.11.7",
     "@tiptap/extension-document": "^2.11.7",
-    "@tiptap/extension-italic": "^2.11.7",
-    "@tiptap/extension-paragraph": "^2.11.7",
-    "@tiptap/extension-text": "^2.11.7",
+    "@tiptap/pm": "^2.11.7",
+    "@tiptap/starter-kit": "^2.11.7",
     "@vitest/coverage-v8": "^3.1.1",
     "esbuild": "^0.25.2",
     "husky": "^9.1.7",

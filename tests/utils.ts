@@ -1,11 +1,8 @@
 import { Editor } from "@tiptap/core";
 import type { JSONContent } from "@tiptap/core";
 import { findChildren } from "@tiptap/core";
-import Bold from "@tiptap/extension-bold";
 import Document from "@tiptap/extension-document";
-import Italic from "@tiptap/extension-italic";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
+import StarterKit from "@tiptap/starter-kit";
 import { StepContent, StepItem, StepTitle, Steps } from "../src";
 
 export const findNodesByType = (editor: Editor, nodeType: string) => {
@@ -24,13 +21,12 @@ export const getStepContents = (editor: Editor) =>
 export function newEditor() {
   return new Editor({
     extensions: [
+      StarterKit.configure({
+        document: false,
+      }),
       Document.extend({
         content: "(block | steps)+",
       }),
-      Text,
-      Paragraph,
-      Italic,
-      Bold,
       Steps,
       StepItem,
       StepTitle,

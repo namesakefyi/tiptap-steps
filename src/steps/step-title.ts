@@ -66,7 +66,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
           const isFirstStep = stepItem.start === steps.start + 1;
           const isCursorAtStartOfStepTitle = $to.pos === stepTitle.start;
           const titleHasContent = stepTitle.node.textContent.trim() !== "";
-          const posBeforeSteps = steps.start - 1;
+          const posBeforeSteps = Math.max(0, steps.start - 2);
 
           // If we're at the start of the first step title, insert paragraph above steps
           if (isFirstStep && isCursorAtStartOfStepTitle) {
@@ -79,7 +79,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
 
           // If we're at the start of a step title after the first item, insert a step item
           if (!isFirstStep && isCursorAtStartOfStepTitle && titleHasContent) {
-            return editor.chain().addStepBefore().run();
+            return editor.chain().insertStep({ before: true }).run();
           }
 
           const isLastStep =
@@ -90,7 +90,7 @@ export const StepTitle = Node.create<StepTitleOptions>({
           // If we're at the end of the last step and the step is empty,
           // delete the step and then insert a paragraph below steps
           if (isLastStep && isLastStepEmpty) {
-            editor.chain().deleteStep().run();
+            editor.chain().removeStep().run();
 
             // We have to find the steps node again to recalculate the position
             const steps = findParentNode((node) => node.type.name === "steps")(
@@ -98,17 +98,14 @@ export const StepTitle = Node.create<StepTitleOptions>({
             );
             if (!steps) return false;
 
-            const posAfterSteps = steps.pos + steps.node.nodeSize;
-            return (
-              editor
-                .chain()
-                .insertContentAt(posAfterSteps, {
-                  type: "paragraph",
-                })
-                // +2 for end token of steps + start token of new paragraph
-                .focus(posAfterSteps + 2)
-                .run()
-            );
+            const posAfterSteps = steps.start + steps.node.nodeSize;
+            return editor
+              .chain()
+              .insertContentAt(posAfterSteps, {
+                type: "paragraph",
+              })
+              .focus(posAfterSteps)
+              .run();
           }
 
           const endOfTitle = stepTitle.start + stepTitle.node.content.size;
@@ -136,12 +133,19 @@ export const StepTitle = Node.create<StepTitleOptions>({
         try {
           const { state } = editor;
           const { selection } = state;
-          const { $from } = selection;
+          const { $from, $to } = selection;
 
           // Only handle if we're in a step title
-          if ($from.parent.type.name !== "stepTitle") return false;
+          const stepTitle = findParentNode(
+            (node) => node.type.name === "stepTitle",
+          )(editor.state.selection);
+          if (!stepTitle) return false;
 
-          return editor.chain().deleteStep().run();
+          // Only handle if we're at the start of the title and no text selected
+          if ($from.pos !== stepTitle.start || $from.pos !== $to.pos)
+            return false;
+
+          return editor.chain().removeStep().run();
         } catch (error) {
           console.error(error);
           return false;

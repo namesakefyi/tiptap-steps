@@ -7,7 +7,7 @@ export interface StepContentOptions {
 export const StepContent = Node.create<StepContentOptions>({
   name: "stepContent",
   content: "block+",
-  defining: true,
+  defining: false,
   selectable: false,
 
   parseHTML() {
@@ -58,7 +58,7 @@ export const StepContent = Node.create<StepContentOptions>({
 
         // Otherwise, we're at the end of the content with an empty line,
         // so delete the empty line and add a new step
-        return editor.chain().joinTextblockBackward().addStep().run();
+        return editor.chain().joinTextblockBackward().insertStep().run();
       },
 
       Backspace: ({ editor }) => {
@@ -78,14 +78,10 @@ export const StepContent = Node.create<StepContentOptions>({
         // +1 to account for the start token of the paragraph node
         if ($to.pos !== stepContent.start + 1) return false;
 
+        const positionToFocus = stepContent.start - 2;
+
         // Otherwise, jump back to the end of the title node
-        return (
-          editor
-            .chain()
-            // -2 to skip start and end tokens
-            .focus(stepContent.start - 2)
-            .run()
-        );
+        return editor.chain().focus(positionToFocus).run();
       },
     };
   },

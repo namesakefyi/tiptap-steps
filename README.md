@@ -194,12 +194,9 @@ Just as with other Tiptap extensions, the `Steps` extension comes with [commands
 
 | Command | Description | Keyboard Shortcut |
 |---------|-------------|-------------------|
-| `setSteps` | Converts selected content into a steps list. If no content is selected, creates an empty step. | - |
-| `unsetSteps` | Converts a steps list back into regular paragraphs, with step titles as bold text. | - |
-| `toggleSteps` | Toggles between steps and regular paragraphs. | `Cmd/Ctrl-Alt-s` |
-| `addStep` | Add a new step after the current step. | - |
-| `addStepBefore` | Adds a new step before the current step. | - |
-| `deleteStep` | Deletes the current step if it's empty. If it's the last step, deletes the entire steps list. | - |
+| `toggleSteps` | Toggles between steps and text content. When inside a steps list, removes selected steps. When outside, creates new steps from selected content. | `Cmd/Ctrl-Alt-s` |
+| `insertStep` | Insert a new step. Accepts `options`:  `{ title?: string; content?: JSONContent[]; before?: boolean }`. If `before` is true, inserts before the current step; otherwise, inserts after. | - |
+| `removeStep` | Remove the current step, converting its content to regular text. Preserves the step's title as a heading if present. | - |
 
 These commands can be used to create toolbar buttons which toggle the state of the steps component on or off.
 

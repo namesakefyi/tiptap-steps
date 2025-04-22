@@ -23,6 +23,24 @@ function App() {
           >
             Toggle Steps
           </button>
+          <button
+            onClick={() => editor.chain().focus().insertStep().run()}
+            disabled={!editor.can().chain().focus().insertStep().run()}
+          >
+            Insert Step
+          </button>
+          <button
+            onClick={() => editor.chain().focus().insertStep({ before: true }).run()}
+            disabled={!editor.can().chain().focus().insertStep({ before: true }).run()}
+          >
+            Insert Step Before
+          </button>
+          <button
+            onClick={() => editor.chain().focus().removeStep().run()}
+            disabled={!editor.can().chain().focus().removeStep().run()}
+          >
+            Remove Step
+          </button>
         </div>
       </div>
     );

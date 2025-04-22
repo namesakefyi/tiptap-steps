@@ -16,7 +16,7 @@ describe("StepContent", () => {
   });
 
   it("renders with correct HTML attributes and placeholder", () => {
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     const html = editor.getHTML();
     expect(html).toMatch(/div data-type="step-content"/);
@@ -24,7 +24,7 @@ describe("StepContent", () => {
 
   it("handles Backspace key at start of content", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);
@@ -64,7 +64,7 @@ describe("StepContent", () => {
 
   it("handles Enter key at end of empty content", () => {
     // Create a steps node with a step item
-    editor.commands.setSteps();
+    editor.commands.toggleSteps();
 
     // Focus at the start of the step title
     const stepTitles = getStepTitles(editor);
